@@ -1,0 +1,27 @@
+FROM cxbyte/nginx
+
+MAINTAINER Andrey Petrov cxbyte@mail.ru
+
+WORKDIR /var/www/default_server
+
+# Install php7 php7-fpm pgsql
+RUN apt-get -y update && apt-get -y upgrade && apt-get install -y python-software-properties software-properties-common \
+    && apt-get install -y git wget curl unzip language-pack-en-base \
+    && export LC_ALL=en_US.UTF-8 && export LANG=en_US.UTF-8 && add-apt-repository ppa:ondrej/php-7.0 \
+    && apt-get -y update && apt-get install -y php7.0 php7.0-pgsql php7.0-fpm php7.0-gd
+
+# Supervisor config
+RUN echo "\n[program:php7.0-fpm]" >> /etc/supervisor/conf.d/supervisord.conf \
+	&& echo "\ncommand=/etc/init.d/php7.0-fpm start" >> /etc/supervisor/conf.d/supervisord.conf
+
+# Nginx laravel config
+COPY default_server /etc/nginx/sites-enabled/default
+
+RUN usermod -u 1000 www-data
+RUN usermod -a -G users www-data
+
+RUN mkdir -p /var/www
+
+COPY index.php index.php
+
+CMD /usr/bin/supervisord

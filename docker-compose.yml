@@ -1,0 +1,11 @@
+balancer:
+  restart: always
+  image: cxbyte/balancer
+  ports:
+   - "80:80"
+  links:
+   - test_ru_app
+
+test_ru_app:
+  restart: always
+  image: cxbyte/test_ru_app
